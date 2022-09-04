@@ -61,6 +61,10 @@ const chains: SupportedChain[] = [
   {
     symbol: Blockchain.AVAX,
     name: 'Avalanche'
+  },
+  {
+    symbol: Blockchain.MATIC,
+    name: 'Polygon'
   }
 ];
 

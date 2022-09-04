@@ -32,6 +32,9 @@ describe('ExternalServices.vue', () => {
     etherscan: {
       apiKey: '123'
     },
+    polygonscan: {
+      apiKey: '123'
+    },
     cryptocompare: {
       apiKey: '123'
     }
@@ -158,11 +161,14 @@ describe('ExternalServices.vue', () => {
 
     test('the fields get updated', async () => {
       const etherscanKey = wrapper.find('.external-services__etherscan-key');
+      const polygonscanKey = wrapper.find('.external-services__polygonscan-key');
       const cryptoCompare = wrapper.find(
         '.external-services__cryptocompare-key'
       );
       // @ts-ignore
       expect(etherscanKey.vm.value).toBe('123');
+      // @ts-ignore
+      expect(polygonscanKey.vm.value).toBe('123');
       // @ts-ignore
       expect(cryptoCompare.vm.value).toBe('123');
     });

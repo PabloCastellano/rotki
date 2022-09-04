@@ -72,6 +72,8 @@ export const useBlockchainBalancesStore = defineStore(
     const ksmBalancesState: Ref<BlockchainAssetBalances> = ref({});
     const dotBalancesState: Ref<BlockchainAssetBalances> = ref({});
     const avaxBalancesState: Ref<BlockchainAssetBalances> = ref({});
+    const maticBalancesState: Ref<BlockchainAssetBalances> = ref({});
+
     const loopringBalancesState: Ref<AccountAssetBalances> = ref({});
 
     const blockchainTotalsState: Ref<Record<Blockchain, AssetBalances>> = ref(
@@ -296,6 +298,7 @@ export const useBlockchainBalancesStore = defineStore(
         { blockchain: Blockchain.KSM, state: ksmBalancesState },
         { blockchain: Blockchain.DOT, state: dotBalancesState },
         { blockchain: Blockchain.AVAX, state: avaxBalancesState },
+        { blockchain: Blockchain.MATIC, state: maticBalancesState },
         {
           blockchain: Blockchain.BTC,
           state: btcBalancesState,
@@ -378,7 +381,8 @@ export const useBlockchainBalancesStore = defineStore(
         ethBalancesState,
         dotBalancesState,
         ksmBalancesState,
-        avaxBalancesState
+        avaxBalancesState,
+        maticBalancesState
       ].map(state => updateDefaultBlockchainPrices(state));
 
       const updateBtcNetworkPrices = (
@@ -723,6 +727,7 @@ export const useBlockchainBalancesStore = defineStore(
       set(ksmBalancesState, {});
       set(dotBalancesState, {});
       set(avaxBalancesState, {});
+      set(maticBalancesState, {});
       set(loopringBalancesState, {});
       set(blockchainTotalsState, defaultTotals());
       set(blockchainLiabilitiesState, defaultTotals());
@@ -736,6 +741,7 @@ export const useBlockchainBalancesStore = defineStore(
       ksmBalancesState,
       dotBalancesState,
       avaxBalancesState,
+      maticBalancesState,
       loopringBalancesState,
       blockchainTotalsState,
       blockchainLiabilitiesState,

@@ -85,6 +85,7 @@ export const useBalancesStore = defineStore('balances', () => {
     ksmAccountsState,
     dotAccountsState,
     avaxAccountsState,
+    maticAccountsState,
     btcAccountsState,
     bchAccountsState,
     eth2ValidatorsState
@@ -107,6 +108,7 @@ export const useBalancesStore = defineStore('balances', () => {
     ksmBalancesState,
     dotBalancesState,
     avaxBalancesState,
+    maticBalancesState,
     btcBalancesState,
     bchBalancesState,
     eth2BalancesState,
@@ -230,7 +232,12 @@ export const useBalancesStore = defineStore('balances', () => {
           blockchain: Blockchain.AVAX,
           balances: get(avaxBalancesState) as BlockchainAssetBalances,
           accounts: get(avaxAccountsState)
-        }
+        },
+        {
+          blockchain: Blockchain.MATIC,
+          balances: get(maticBalancesState) as BlockchainAssetBalances,
+          accounts: get(maticAccountsState)
+        },
       ];
 
       list.map(item =>

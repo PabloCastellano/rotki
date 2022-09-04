@@ -1069,7 +1069,8 @@
       "eth": "Ethereum balances",
       "eth2": "Eth2 balances",
       "ksm": "Kusama balances",
-      "loopring": "Loopring balances"
+      "loopring": "Loopring balances",
+      "matic": "Polygon balances"
     },
     "form_dialog": {
       "add_title": "Add blockchain account",
@@ -1094,7 +1095,8 @@
     "dot": "Polkadot",
     "eth": "Ethereum",
     "eth2": "Eth2",
-    "ksm": "Kusama"
+    "ksm": "Kusama",
+    "matic": "Polygon"
   },
   "borrowing": {
     "header": "Collateralized Loans",
@@ -1904,6 +1906,13 @@
       "label": "API Key",
       "link": "You can apply for an API key {link}",
       "title": "Opensea"
+    },
+    "polygonscan": {
+      "delete_tooltip": "Deletes the Polygonscan API key",
+      "description": "Recommended for any Polygon blockchain balances or transactions if you are not using your own node.",
+      "hint": "Enter your Polygonscan API key",
+      "label": "API key",
+      "title": "Polygonscan"
     },
     "set": {
       "error": {

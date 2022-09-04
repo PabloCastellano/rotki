@@ -66,6 +66,7 @@ import { logger } from '@/utils/logging';
 const chains = [
   Blockchain.ETH,
   Blockchain.AVAX,
+  Blockchain.MATIC,
   Blockchain.DOT,
   Blockchain.KSM
 ] as const;
@@ -213,6 +214,7 @@ export const useBlockchainAccountsStore = defineStore(
     const ksmAccountsState: Ref<GeneralAccountData[]> = ref([]);
     const dotAccountsState: Ref<GeneralAccountData[]> = ref([]);
     const avaxAccountsState: Ref<GeneralAccountData[]> = ref([]);
+    const maticAccountsState: Ref<GeneralAccountData[]> = ref([]);
 
     const { awaitTask, isTaskRunning } = useTasks();
     const { notify } = useNotifications();
@@ -245,7 +247,8 @@ export const useBlockchainAccountsStore = defineStore(
             [Blockchain.ETH]: ethAccountsState,
             [Blockchain.KSM]: ksmAccountsState,
             [Blockchain.DOT]: dotAccountsState,
-            [Blockchain.AVAX]: avaxAccountsState
+            [Blockchain.AVAX]: avaxAccountsState,
+            [Blockchain.MATIC]: maticAccountsState
           };
 
           const state = listState[blockchain];
@@ -313,7 +316,8 @@ export const useBlockchainAccountsStore = defineStore(
         Blockchain.ETH,
         Blockchain.KSM,
         Blockchain.DOT,
-        Blockchain.AVAX
+        Blockchain.AVAX,
+        Blockchain.MATIC
       ] as const;
       nonBtcChain.forEach(blockchain => {
         addRequest(blockchain, chain => getAccounts(chain));
@@ -336,6 +340,7 @@ export const useBlockchainAccountsStore = defineStore(
       dotBalancesState,
       ksmBalancesState,
       avaxBalancesState,
+      maticBalancesState,
       btcBalancesState,
       bchBalancesState,
       loopringBalancesState
@@ -360,6 +365,7 @@ export const useBlockchainAccountsStore = defineStore(
         const listState = {
           [Blockchain.ETH]: ethAccountsState,
           [Blockchain.AVAX]: avaxAccountsState,
+          [Blockchain.MATIC]: maticAccountsState,
           [Blockchain.DOT]: dotAccountsState,
           [Blockchain.KSM]: ksmAccountsState
         };
@@ -537,6 +543,10 @@ export const useBlockchainAccountsStore = defineStore(
         {
           blockchain: Blockchain.AVAX,
           state: avaxAccountsState
+        },
+        {
+          blockchain: Blockchain.MATIC,
+          state: maticAccountsState
         },
         {
           blockchain: Blockchain.BTC,
@@ -811,7 +821,8 @@ export const useBlockchainAccountsStore = defineStore(
         ethAccountsState,
         dotAccountsState,
         ksmAccountsState,
-        avaxAccountsState
+        avaxAccountsState,
+        maticAccountsState
       ].forEach(state => updateDefaultBlockchainTags(state));
 
       const updateBtcNetworkTags = (state: Ref<BtcAccountData>) => {
@@ -886,6 +897,14 @@ export const useBlockchainAccountsStore = defineStore(
         get(avaxAccountsState),
         get(avaxBalancesState) as BlockchainAssetBalances,
         Blockchain.AVAX
+      );
+    });
+
+    const maticAccounts = computed<AccountWithBalance[]>(() => {
+      return accountsWithBalances(
+        get(maticAccountsState),
+        get(maticBalancesState) as BlockchainAssetBalances,
+        Blockchain.MATIC
       );
     });
 
@@ -1045,6 +1064,12 @@ export const useBlockchainAccountsStore = defineStore(
           accounts: get(avaxAccounts)
         },
         {
+          blockchain: Blockchain.MATIC,
+          section: Section.BLOCKCHAIN_MATIC,
+          childrenTotals: [],
+          accounts: get(maticAccounts)
+        },
+        {
           blockchain: Blockchain.ETH2,
           section: Section.BLOCKCHAIN_ETH2,
           childrenTotals: [],
@@ -1074,6 +1099,10 @@ export const useBlockchainAccountsStore = defineStore(
 
     const ethAddresses = computed<string[]>(() => {
       return get(ethAccountsState).map(({ address }) => address);
+    });
+
+    const maticAddresses = computed<string[]>(() => {
+      return get(maticAccountsState).map(({ address }) => address);
     });
 
     const accounts = computed<GeneralAccount[]>(() => {
@@ -1115,6 +1144,7 @@ export const useBlockchainAccountsStore = defineStore(
       });
 
     const ethDetectedTokensRecord = ref<EthDetectedTokensRecord>({});
+    const maticDetectedTokensRecord = ref<EthDetectedTokensRecord>({});
 
     const fetchDetectedTokens = async (address: string | null = null) => {
       try {
@@ -1122,6 +1152,7 @@ export const useBlockchainAccountsStore = defineStore(
           const { awaitTask } = useTasks();
           const taskType = TaskType.FETCH_DETECTED_TOKENS;
 
+          // TODO: Add support for polygon network
           const { taskId } = await api.balances.fetchDetectedTokensTask([
             address
           ]);
@@ -1152,6 +1183,12 @@ export const useBlockchainAccountsStore = defineStore(
             ethDetectedTokensRecord,
             await api.balances.fetchDetectedTokens(get(ethAddresses))
           );
+
+          set(
+            maticDetectedTokensRecord,
+            await api.balances.fetchDetectedTokens(get(maticAddresses))
+          );
+
         }
       } catch (e) {
         logger.error(e);
@@ -1186,6 +1223,12 @@ export const useBlockchainAccountsStore = defineStore(
       }
     });
 
+    watch(maticAddresses, (curr, prev) => {
+      if (!isEqual(curr, prev)) {
+        fetchDetectedTokens();
+      }
+    });
+
     const reset = () => {
       set(ethAccountsState, []);
       set(eth2ValidatorsState, {
@@ -1204,6 +1247,7 @@ export const useBlockchainAccountsStore = defineStore(
       set(ksmAccountsState, []);
       set(dotAccountsState, []);
       set(avaxAccountsState, []);
+      set(maticAccountsState, []);
       set(ethDetectedTokensRecord, {});
     };
 
@@ -1212,6 +1256,7 @@ export const useBlockchainAccountsStore = defineStore(
       ksmAccountsState,
       dotAccountsState,
       avaxAccountsState,
+      maticAccountsState,
       btcAccountsState,
       bchAccountsState,
       eth2ValidatorsState,
@@ -1219,6 +1264,7 @@ export const useBlockchainAccountsStore = defineStore(
       ksmAccounts,
       dotAccounts,
       avaxAccounts,
+      maticAccounts,
       btcAccounts,
       bchAccounts,
       eth2Accounts,

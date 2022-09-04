@@ -6,6 +6,7 @@ export enum Blockchain  {
   KSM = "KSM",
   DOT = "DOT",
   AVAX = "AVAX",
+  MATIC = "MATIC",
 }
 
 export enum DefiProtocol {

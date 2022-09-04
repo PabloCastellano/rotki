@@ -188,6 +188,23 @@
     />
 
     <account-balances
+      v-if="maticAccounts.length > 0"
+      id="blockchain-balances-MATIC"
+      v-intersect="{
+        handler: observers.MATIC,
+        options: {
+          threshold
+        }
+      }"
+      class="mt-8"
+      :title="tc('blockchain_balances.balances.matic')"
+      :blockchain="Blockchain.MATIC"
+      :balances="maticAccounts"
+      data-cy="blockchain-balances-MATIC"
+      @edit-account="editAccount($event)"
+    />
+
+    <account-balances
       v-if="loopringAccounts.length > 0"
       id="blockchain-balances-LRC"
       loopring
@@ -231,6 +248,7 @@ type BlockchainData = {
   ethAccounts: Ref<BlockchainAccountWithBalance[]>;
   eth2Accounts: Ref<BlockchainAccountWithBalance[]>;
   avaxAccounts: Ref<BlockchainAccountWithBalance[]>;
+  maticAccounts: Ref<BlockchainAccountWithBalance[]>;
   ksmAccounts: Ref<BlockchainAccountWithBalance[]>;
   loopringAccounts: Ref<BlockchainAccountWithBalance[]>;
 };
@@ -300,6 +318,7 @@ const intersections = ref<Intersections>({
   [Blockchain.KSM]: false,
   [Blockchain.DOT]: false,
   [Blockchain.AVAX]: false
+  [Blockchain.MATIC]: false
 });
 
 const updateWhenRatio = (
@@ -319,6 +338,7 @@ const {
   ethAccounts,
   eth2Accounts,
   avaxAccounts,
+  maticAccounts,
   ksmAccounts,
   loopringAccounts
 } = storeToRefs(useBlockchainAccountsStore());
@@ -330,6 +350,7 @@ const blockchainData: BlockchainData = {
   ethAccounts,
   eth2Accounts,
   avaxAccounts,
+  maticAccounts,
   ksmAccounts,
   loopringAccounts
 };
@@ -351,6 +372,8 @@ const getFirstContext = (data: BlockchainData) => {
     return Blockchain.DOT;
   } else if (hasData(data.avaxAccounts)) {
     return Blockchain.AVAX;
+  } else if (hasData(data.maticAccounts)) {
+    return Blockchain.MATIC;
   }
 
   return Blockchain.ETH;
@@ -382,7 +405,9 @@ const observers = {
   [Blockchain.DOT]: (entries: IntersectionObserverEntry[]) =>
     updateWhenRatio(entries, Blockchain.DOT),
   [Blockchain.AVAX]: (entries: IntersectionObserverEntry[]) =>
-    updateWhenRatio(entries, Blockchain.AVAX)
+    updateWhenRatio(entries, Blockchain.AVAX),
+  [Blockchain.MATIC]: (entries: IntersectionObserverEntry[]) =>
+    updateWhenRatio(entries, Blockchain.MATIC)
 };
 
 const { isTaskRunning } = useTasks();

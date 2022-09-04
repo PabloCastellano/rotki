@@ -73,7 +73,8 @@ const PerAccountBalances = z.object({
   [Blockchain.BCH]: BtcBalances.optional(),
   [Blockchain.KSM]: BlockchainAssetBalances.optional(),
   [Blockchain.DOT]: BlockchainAssetBalances.optional(),
-  [Blockchain.AVAX]: BlockchainAssetBalances.optional()
+  [Blockchain.AVAX]: BlockchainAssetBalances.optional(),
+  [Blockchain.MATIC]: BlockchainAssetBalances.optional()
 });
 
 export const BlockchainBalances = z.object({
@@ -90,6 +91,7 @@ export type OracleCacheMeta = {
   readonly toTimestamp: string;
 };
 
+// TODO: Rename to EvmDetectedTokens?
 export const EthDetectedTokens = z.object({
   tokens: z.array(z.string()).nullish(),
   lastUpdateTimestamp: z.number().nullish()

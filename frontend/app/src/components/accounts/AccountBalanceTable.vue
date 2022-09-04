@@ -55,7 +55,7 @@
       <template v-if="isEth2" #item.ownershipPercentage="{ item }">
         <percentage-display :value="item.ownershipPercentage" />
       </template>
-      <template v-if="isEth" #item.numOfDetectedTokens="{ item }">
+      <template v-if="isEth || isMatic" #item.numOfDetectedTokens="{ item }">
         <div class="d-flex align-center justify-end">
           <div class="mr-2">
             {{ getEthDetectedTokensInfo(item.address).value.total }}
@@ -283,6 +283,7 @@ const isEth2 = computed<boolean>(() => get(blockchain) === Blockchain.ETH2);
 const isBtcNetwork = computed<boolean>(() =>
   [Blockchain.BTC, Blockchain.BCH].includes(get(blockchain))
 );
+const isMatic = computed<boolean>(() => get(blockchain) === Blockchain.MATIC);
 
 const withL2 = (
   balances: BlockchainAccountWithBalance[]
@@ -301,7 +302,6 @@ const withL2 = (
     const loopringEth =
       assetBalances.find(({ asset }) => asset === Blockchain.ETH)?.amount ??
       Zero;
-
     return {
       ...value,
       index,
@@ -520,7 +520,7 @@ const tableHeaders = computed<DataTableHeader[]>(() => {
     });
   }
 
-  if (get(isEth)) {
+  if (get(isEth) || get(isMatic)) {
     headers.push({
       text: tc('account_balances.headers.num_of_detected_tokens'),
       value: 'numOfDetectedTokens',

@@ -20,6 +20,10 @@ export const explorerUrls: AssetExplorerUrls = {
     address: 'https://beaconcha.in/validator/',
     transaction: ''
   },
+  MATIC: {
+    address: 'https://polygonscan.com/address/',
+    transaction: 'https://polygonscan.com/tx/'
+  },
   BTC: {
     address: 'https://blockstream.info/address/',
     transaction: 'https://blockstream.info/tx/'

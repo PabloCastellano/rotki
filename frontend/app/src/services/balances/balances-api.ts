@@ -428,6 +428,7 @@ export class BalancesApi {
   ): Promise<T> {
     return this.axios
       .post<ActionResult<T>>(
+        // TODO: Remove ETH from url?
         '/blockchains/ETH/tokens/detect',
         axiosSnakeCaseTransformer({
           asyncQuery,
@@ -446,6 +447,7 @@ export class BalancesApi {
     return this.internalDetectedTokens<PendingTask>(addresses, true);
   }
 
+  // TODO: fix con network
   async fetchDetectedTokens(
     addresses: string[]
   ): Promise<EthDetectedTokensRecord> {

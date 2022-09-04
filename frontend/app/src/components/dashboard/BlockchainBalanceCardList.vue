@@ -73,6 +73,7 @@ const name = computed<string>(() => {
       [Blockchain.KSM]: t('blockchains.ksm').toString(),
       [Blockchain.DOT]: t('blockchains.dot').toString(),
       [Blockchain.AVAX]: t('blockchains.avax').toString()
+      [Blockchain.MATIC]: t('blockchains.matic').toString()
     }[chain] ?? ''
   );
 });

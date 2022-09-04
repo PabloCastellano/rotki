@@ -24,6 +24,21 @@
 
     <api-key-box>
       <service-key
+        v-model="polygonscanKey"
+        class="external-services__polygonscan-key"
+        :title="tc('external_services.polygonscan.title')"
+        :description="tc('external_services.polygonscan.description')"
+        :label="tc('external_services.polygonscan.label')"
+        :hint="tc('external_services.polygonscan.hint')"
+        :loading="loading"
+        :tooltip="tc('external_services.polygonscan.delete_tooltip')"
+        @save="save('polygonscan', $event)"
+        @delete-key="deleteKey('polygonscan')"
+      />
+    </api-key-box>
+
+    <api-key-box>
+      <service-key
         v-model="cryptocompareKey"
         class="external-services__cryptocompare-key"
         :title="tc('external_services.cryptocompare.title')"
@@ -158,6 +173,7 @@ import {
 import { assert } from '@/utils/assertions';
 
 const etherscanKey = ref('');
+const polygonscanKey = ref('');
 const cryptocompareKey = ref('');
 const covalentKey = ref('');
 const beaconchainKey = ref('');
@@ -182,6 +198,7 @@ const updateKeys = ({
   cryptocompare,
   covalent,
   etherscan,
+  polygonscan,
   beaconchain,
   loopring,
   opensea
@@ -189,6 +206,7 @@ const updateKeys = ({
   set(cryptocompareKey, cryptocompare?.apiKey || '');
   set(covalentKey, covalent?.apiKey || '');
   set(etherscanKey, etherscan?.apiKey || '');
+  set(polygonscanKey, polygonscan?.apiKey || '');
   set(beaconchainKey, beaconchain?.apiKey || '');
   set(loopringKey, loopring?.apiKey || '');
   set(openseaKey, opensea?.apiKey || '');

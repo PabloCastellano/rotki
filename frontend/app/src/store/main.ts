@@ -34,6 +34,7 @@ export const useMainStore = defineStore('main', () => {
       isLoading(get(getStatus(Section.BLOCKCHAIN_BTC))) ||
       isLoading(get(getStatus(Section.BLOCKCHAIN_KSM))) ||
       isLoading(get(getStatus(Section.BLOCKCHAIN_AVAX))) ||
+      isLoading(get(getStatus(Section.BLOCKCHAIN_MATIC))) ||
       isLoading(get(getStatus(Section.EXCHANGES))) ||
       isLoading(get(getStatus(Section.MANUAL_BALANCES)))
     );
