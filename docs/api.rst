@@ -2894,12 +2894,12 @@ Querying owned assets
    :statuscode 409: No user is currently logged in.
    :statuscode 500: Internal rotki error
 
-Detecting owned ethereum tokens
-===============================
+Detecting owned tokens
+======================
 
-.. http:post:: /api/(version)/blockchains/ETH/tokens/detect
+.. http:post:: /api/(version)/blockchains/(blockchain)/tokens/detect
 
-   Doing POST on the detect tokens endpoint will detect ethereum tokens owned by the provided addresses. If no addresses provided, tokens for all user's ethereum addresses will be detected.
+   Doing POST on the detect tokens endpoint will detect tokens owned by the provided addresses. If no addresses provided, tokens for all user's addresses will be detected.
 
     .. note::
           This endpoint can also be queried asynchronously by using ``"async_query": true``

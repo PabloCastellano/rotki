@@ -1051,9 +1051,9 @@ class ChainManager(CacheableMixIn, LockableQueryMixIn):
             dsr_proxy_append: bool,
             balance_result: Dict[ChecksumEvmAddress, Dict[EvmToken, FVal]],
             token_usd_price: Dict[EvmToken, Price],
+            balances: DefaultDict[ChecksumEvmAddress, BalanceSheet],
     ) -> None:
         # Update the per account token balance and usd value
-        eth_balances = self.balances.eth
         for account, token_balances in balance_result.items():
             for token, token_balance in token_balances.items():
                 balance = Balance(
@@ -1061,11 +1061,15 @@ class ChainManager(CacheableMixIn, LockableQueryMixIn):
                     usd_value=token_balance * token_usd_price[token],
                 )
                 if dsr_proxy_append is True:
-                    eth_balances[account].assets[token] += balance
+                    balances[account].assets[token] += balance
                 else:
-                    eth_balances[account].assets[token] = balance
+                    balances[account].assets[token] = balance
 
-    def query_ethereum_tokens(self) -> None:
+    def query_tokens(
+            self,
+            manager: 'EthereumManager',
+            balances: DefaultDict[ChecksumEvmAddress, BalanceSheet],
+    ) -> None:
         """Queries ethereum token balance via either etherscan or ethereum node
 
         Should come here during addition of a new account or querying of all token
@@ -1077,7 +1081,7 @@ class ChainManager(CacheableMixIn, LockableQueryMixIn):
         - EthSyncError if querying the token balances through a provided ethereum
         client and the chain is not synced
         """
-        evmtokens = EvmTokens(database=self.database, manager=self.ethereum)
+        evmtokens = EvmTokens(database=self.database, manager=manager)
         try:
             balance_result, token_usd_price = evmtokens.query_tokens_for_addresses(
                 addresses=self.accounts.eth,
@@ -1096,6 +1100,7 @@ class ChainManager(CacheableMixIn, LockableQueryMixIn):
             dsr_proxy_append=False,
             balance_result=balance_result,
             token_usd_price=token_usd_price,
+            balances=balances,
         )
 
     def query_defi_balances(self) -> Dict[ChecksumEvmAddress, List[DefiProtocolBalances]]:
@@ -1144,7 +1149,7 @@ class ChainManager(CacheableMixIn, LockableQueryMixIn):
             )
 
         self.query_defi_balances()
-        self.query_ethereum_tokens()
+        self.query_tokens(manager=self.ethereum, balances=self.balances.eth)
         self._add_protocol_balances()
 
     def query_ethereum_lp_balances(
@@ -1260,6 +1265,7 @@ class ChainManager(CacheableMixIn, LockableQueryMixIn):
                 dsr_proxy_append=True,
                 balance_result=new_result,
                 token_usd_price=token_usd_price,
+                balances=eth_balances,
             )
 
             # also query defi balances to get liabilities

@@ -224,7 +224,7 @@ class EvmTokens():
         """
         with self.db.conn.read_ctx() as cursor:
             if only_cache is False:
-                self._detect_tokens(cursor, addresses=addresses)
+                self._detect_evm_tokens(cursor, addresses=addresses)
 
             addresses_info: DetectedTokensType = {}
             for address in addresses:
@@ -235,7 +235,7 @@ class EvmTokens():
 
         return addresses_info
 
-    def _detect_tokens(
+    def _detect_evm_tokens(
             self,
             cursor: 'DBCursor',
             addresses: List[ChecksumEvmAddress],
