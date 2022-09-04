@@ -681,11 +681,13 @@ class RestAPI():
                 result['per_account'].pop('KSM', None)
                 result['per_account'].pop('DOT', None)
                 result['per_account'].pop('AVAX', None)
+                result['per_account'].pop('MATIC', None)
                 result['per_account'].pop('ETH2', None)
                 result['totals']['assets'].pop('BTC', None)
                 result['totals']['assets'].pop('KSM', None)
                 result['totals']['assets'].pop('DOT', None)
                 result['totals']['assets'].pop('AVAX', None)
+                result['totals']['assets'].pop('MATIC', None)
                 result['totals']['assets'].pop('ETH2', None)
             elif blockchain is not None:
                 native_token = blockchain.value
@@ -1419,6 +1421,7 @@ class RestAPI():
         AssetResolver().assets_cache.pop(source_identifier, None)
         return api_response(OK_RESULT, status_code=HTTPStatus.OK)
 
+    # XXX: Rename accordingly - it's not only ethereum anymore
     @staticmethod
     def get_custom_ethereum_tokens(
             address: Optional[ChecksumEvmAddress],
@@ -3748,6 +3751,38 @@ class RestAPI():
         # success
         result_dict = _wrap_in_result(result, msg)
         return api_response(process_result(result_dict), status_code=status_code)
+
+    def _get_matic_token_info(self, address: ChecksumEvmAddress) -> Dict[str, Any]:
+        matic_manager = self.rotkehlchen.chain_manager.matic
+        try:
+            info = matic_manager.get_basic_contract_info(address=address)
+        except BadFunctionCallOutput:
+            return wrap_in_fail_result(
+                f'Address {address} seems to not be a deployed contract',
+                status_code=HTTPStatus.CONFLICT,
+            )
+        return _wrap_in_ok_result(info)
+
+    def get_matic_token_information(
+        self,
+        token_address: ChecksumEvmAddress,
+        async_query: bool,
+    ) -> Response:
+
+        if async_query is True:
+            return self._query_async(command=self._get_token_info, address=token_address)
+
+        response = self._get_matic_token_info(token_address)
+
+        result = response['result']
+        msg = response['message']
+        status_code = _get_status_code_from_async_response(response)
+        if result is None:
+            return api_response(wrap_in_fail_result(msg), status_code=status_code)
+
+        # Success
+        result_dict = _wrap_in_result(result, msg)
+        return api_response(result_dict, status_code=status_code)
 
     def get_nfts(self, async_query: bool, ignore_cache: bool) -> Response:
         return self._api_query_for_eth_module(

@@ -95,6 +95,7 @@ from rotkehlchen.api.v1.schemas import (
     NamedOracleCacheSchema,
     NewUserSchema,
     OptionalEthereumAddressSchema,
+    PolygonTransactionQuerySchema,
     QueriedAddressesSchema,
     RequiredEthereumAddressSchema,
     ReverseEnsSchema,
@@ -2347,6 +2348,35 @@ class AvalancheTransactionsResource(BaseMethodView):
         )
 
 
+class PolygonTransactionsResource(BaseMethodView):
+    get_schema = PolygonTransactionQuerySchema()
+
+    @require_loggedin_user()
+    @use_kwargs(get_schema, location='json_and_query_and_view_args')
+    def get(
+        self,
+        async_query: bool,
+        address: ChecksumEvmAddress,
+        from_timestamp: Timestamp,
+        to_timestamp: Timestamp,
+    ) -> Response:
+        return self.rest_api.get_polygon_transactions(
+            async_query=async_query,
+            address=address,
+            from_timestamp=from_timestamp,
+            to_timestamp=to_timestamp,
+        )
+
+
+class ERC20TokenInfoMATIC(BaseMethodView):
+    get_schema = ERC20InfoSchema()
+
+    @require_loggedin_user()
+    @use_kwargs(get_schema, location='json_and_query')
+    def get(self, address: ChecksumEvmAddress, async_query: bool) -> Response:
+        return self.rest_api.get_matic_token_information(address, async_query)
+
+
 class NFTSResource(BaseMethodView):
     get_schema = AsyncIgnoreCacheQueryArgumentSchema()
 
@@ -2563,6 +2593,7 @@ class AllNamesResource(BaseMethodView):
         return self.rest_api.search_for_names_everywhere(addresses=addresses)
 
 
+# TODO: Receive and pass network:str
 class DetectTokensResource(BaseMethodView):
     post_schema = DetectTokensSchema()
 
@@ -2574,6 +2605,7 @@ class DetectTokensResource(BaseMethodView):
             async_query: bool,
             only_cache: bool,
             addresses: Optional[List[ChecksumEvmAddress]],
+            network: str = "ethereum",
     ) -> Response:
         return self.rest_api.detect_evm_tokens(
             async_query=async_query,

@@ -433,6 +433,7 @@ class Inquirer():
             asset: Asset,
             ignore_cache: bool = False,
             skip_onchain: bool = False,
+            chain: ChainID = ChainID.ETHEREUM,
     ) -> Price:
         """Returns the current USD price of the asset
 
@@ -464,9 +465,10 @@ class Inquirer():
                     is_known_protocol = token.protocol in KnownProtocolsAssets
                 underlying_tokens = GlobalDBHandler().get_evm_token(  # type: ignore
                     token.evm_address,
-                    chain=ChainID.ETHEREUM,
+                    chain=chain,
+                    # chain=ChainID.ETHEREUM, ## XXX: !!
                 ).underlying_tokens
-        except UnknownAsset:
+        except (AttributeError, UnknownAsset):
             pass
 
         # Check if it is a special token

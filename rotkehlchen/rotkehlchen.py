@@ -38,7 +38,9 @@ from rotkehlchen.chain.ethereum.manager import EthereumManager
 from rotkehlchen.chain.ethereum.oracles.saddle import SaddleOracle
 from rotkehlchen.chain.ethereum.oracles.uniswap import UniswapV2Oracle, UniswapV3Oracle
 from rotkehlchen.chain.ethereum.transactions import EthTransactions
+from rotkehlchen.chain.ethereum.types import NodeName, WeightedNode
 from rotkehlchen.chain.manager import ChainManager
+from rotkehlchen.chain.polygon.manager import PolygonManager
 from rotkehlchen.chain.substrate.manager import SubstrateManager
 from rotkehlchen.chain.substrate.types import SubstrateChain
 from rotkehlchen.chain.substrate.utils import (
@@ -58,7 +60,7 @@ from rotkehlchen.externalapis.beaconchain import BeaconChain
 from rotkehlchen.externalapis.coingecko import Coingecko
 from rotkehlchen.externalapis.covalent import Covalent, chains_id
 from rotkehlchen.externalapis.cryptocompare import Cryptocompare
-from rotkehlchen.externalapis.etherscan import Etherscan
+from rotkehlchen.externalapis.etherscan import Etherscan, Polygonscan
 from rotkehlchen.fval import FVal
 from rotkehlchen.globaldb import GlobalDBHandler
 from rotkehlchen.globaldb.updates import AssetsUpdater
@@ -246,6 +248,7 @@ class Rotkehlchen():
                 should_submit=settings.submit_usage_analytics,
             )
             self.etherscan = Etherscan(database=self.data.db, msg_aggregator=self.msg_aggregator)  # noqa: E501
+            self.polygonscan = Polygonscan(database=self.data.db, msg_aggregator=self.msg_aggregator)  # noqa: E501
             self.beaconchain = BeaconChain(database=self.data.db, msg_aggregator=self.msg_aggregator)  # noqa: E501
             # Initialize the price historian singleton
             PriceHistorian(
@@ -299,6 +302,40 @@ class Rotkehlchen():
             msg_aggregator=self.msg_aggregator,
         )
 
+        # self.covalent_polygon = Covalent(
+        #     database=self.data.db,
+        #     msg_aggregator=self.msg_aggregator,
+        #     chain_id=chains_id['matic'],
+        # )
+
+        # TODO: add more
+        # https://getblock.io/nodes/matic/
+        # https://docs.polygon.technology/docs/develop/network-details/network/
+        polygon_nodes = [
+            WeightedNode(
+                identifier=8,
+                node_info=NodeName(
+                    name="Ankr",
+                    endpoint="https://polygon-rpc.com",
+                    owned=False,
+                ),
+                weight=FVal(1),
+                active=True,
+            )
+        ]
+
+        # TODO: XXX: Copiar más como avalanche_manager, con rpc de ankr y covalent
+        polygon_manager = PolygonManager(
+            etherscan=self.polygonscan,
+            msg_aggregator=self.msg_aggregator,
+            greenlet_manager=self.greenlet_manager,
+            database=self.data.db,
+            connect_at_start=polygon_nodes,
+            # covalent=self.covalent_polygon,
+        )
+
+        log.info(f"##eth>> {ethereum_nodes}")
+        log.info(f"##matic>> {polygon_nodes}")
         Inquirer().inject_ethereum(ethereum_manager)
         uniswap_v2_oracle = UniswapV2Oracle(ethereum_manager)
         uniswap_v3_oracle = UniswapV3Oracle(ethereum_manager)
@@ -316,6 +353,7 @@ class Rotkehlchen():
             kusama_manager=kusama_manager,
             polkadot_manager=polkadot_manager,
             avalanche_manager=avalanche_manager,
+            polygon_manager=polygon_manager,
             msg_aggregator=self.msg_aggregator,
             database=self.data.db,
             greenlet_manager=self.greenlet_manager,

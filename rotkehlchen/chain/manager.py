@@ -63,9 +63,10 @@ from rotkehlchen.constants.assets import (
     A_ETH2,
     A_KSM,
     A_LQTY,
+    A_MATIC,
 )
 from rotkehlchen.constants.misc import ONE, ZERO
-from rotkehlchen.constants.resolver import ethaddress_to_identifier
+from rotkehlchen.constants.resolver import ChainID, ethaddress_to_identifier
 from rotkehlchen.db.eth2 import DBEth2
 from rotkehlchen.db.filtering import Eth2DailyStatsFilterQuery
 from rotkehlchen.db.queried_addresses import QueriedAddresses
@@ -179,6 +180,7 @@ class BlockchainBalances:
     ksm: Dict[KusamaAddress, BalanceSheet] = field(init=False)
     dot: Dict[PolkadotAddress, BalanceSheet] = field(init=False)
     avax: DefaultDict[ChecksumEvmAddress, BalanceSheet] = field(init=False)
+    matic: DefaultDict[ChecksumEvmAddress, BalanceSheet] = field(init=False)
 
     def copy(self) -> 'BlockchainBalances':
         balances = BlockchainBalances(db=self.db)
@@ -189,6 +191,7 @@ class BlockchainBalances:
         balances.ksm = self.ksm.copy()
         balances.dot = self.dot.copy()
         balances.avax = self.avax.copy()
+        balances.matic = self.matic.copy()
         return balances
 
     def __post_init__(self) -> None:
@@ -199,6 +202,7 @@ class BlockchainBalances:
         self.ksm = defaultdict(BalanceSheet)
         self.dot = defaultdict(BalanceSheet)
         self.avax = defaultdict(BalanceSheet)
+        self.matic = defaultdict(BalanceSheet)
 
     def recalculate_totals(self) -> BalanceSheet:
         """Calculate and return new balance totals based on per-account data"""
@@ -217,6 +221,8 @@ class BlockchainBalances:
             new_totals += dot_balances
         for avax_balances in self.avax.values():
             new_totals += avax_balances
+        for matic_balances in self.matic.values():
+            new_totals += matic_balances
         return new_totals
 
     def serialize(self) -> Dict[str, Dict]:
@@ -227,6 +233,7 @@ class BlockchainBalances:
         ksm_balances = {k: v.serialize() for k, v in self.ksm.items()}
         dot_balances = {k: v.serialize() for k, v in self.dot.items()}
         avax_balances = {k: v.serialize() for k, v in self.avax.items()}
+        matic_balances = {k: v.serialize() for k, v in self.matic.items()}
 
         with self.db.conn.read_ctx() as cursor:
             btc_xpub_mappings = self.db.get_addresses_to_xpub_mapping(
@@ -266,6 +273,8 @@ class BlockchainBalances:
             blockchain_balances['DOT'] = dot_balances
         if avax_balances != {}:
             blockchain_balances['AVAX'] = avax_balances
+        if matic_balances != {}:
+            blockchain_balances['MATIC'] = matic_balances
 
         return blockchain_balances
 
@@ -331,6 +340,7 @@ class ChainManager(CacheableMixIn, LockableQueryMixIn):
             kusama_manager: 'SubstrateManager',
             polkadot_manager: 'SubstrateManager',
             avalanche_manager: 'AvalancheManager',
+            polygon_manager: 'EthereumManager',
             msg_aggregator: MessagesAggregator,
             database: 'DBHandler',
             greenlet_manager: GreenletManager,
@@ -346,6 +356,7 @@ class ChainManager(CacheableMixIn, LockableQueryMixIn):
         self.kusama = kusama_manager
         self.polkadot = polkadot_manager
         self.avalanche = avalanche_manager
+        self.polygon = polygon_manager
         self.database = database
         self.msg_aggregator = msg_aggregator
         self.accounts = blockchain_accounts
@@ -363,6 +374,7 @@ class ChainManager(CacheableMixIn, LockableQueryMixIn):
         self.ksm_lock = Semaphore()
         self.dot_lock = Semaphore()
         self.avax_lock = Semaphore()
+        self.matic_lock = Semaphore()
 
         # Per account balances
         self.balances = BlockchainBalances(db=database)
@@ -610,6 +622,7 @@ class ChainManager(CacheableMixIn, LockableQueryMixIn):
         should_query_ksm = not blockchain or blockchain == SupportedBlockchain.KUSAMA
         should_query_dot = not blockchain or blockchain == SupportedBlockchain.POLKADOT
         should_query_avax = not blockchain or blockchain == SupportedBlockchain.AVALANCHE
+        should_query_matic = not blockchain or blockchain == SupportedBlockchain.POLYGON
 
         if should_query_eth:
             self.query_ethereum_balances(
@@ -630,6 +643,8 @@ class ChainManager(CacheableMixIn, LockableQueryMixIn):
             self.query_polkadot_balances(ignore_cache=ignore_cache)
         if should_query_avax:
             self.query_avax_balances(ignore_cache=ignore_cache)
+        if should_query_matic:
+            self.query_matic_balances(ignore_cache=ignore_cache)
         if ignore_cache is True:
             self.derive_new_addresses_from_xpubs(
                 should_derive_bch_xpubs=should_query_bch,
@@ -754,6 +769,42 @@ class ChainManager(CacheableMixIn, LockableQueryMixIn):
             self.balances.avax[account] = BalanceSheet(
                 assets=defaultdict(Balance, {A_AVAX: Balance(amount, usd_value)}),
             )
+
+    @protect_with_lock()
+    @cache_response_timewise()
+    def query_matic_balances(
+            self,  # pylint: disable=unused-argument
+            # Kwargs here is so linters don't complain when the "magic" ignore_cache kwarg is given
+            **kwargs: Any,
+    ) -> None:
+        """Queries the MATIC balances of the accounts via Polygon endpoints.
+        May raise:
+        - RemotError: if no nodes are available or the balances request fails.
+        """
+        if len(self.accounts.matic) == 0:
+            return
+
+        # Query matic balance
+        # No encuentra en database?
+        # matic_usd_price = Inquirer().find_usd_price(A_MATIC, chain=ChainID.MATIC)
+        matic_usd_price = Inquirer().find_usd_price(A_MATIC)
+        account_amount = self.polygon.get_multieth_balance(self.accounts.matic)
+        for account, amount in account_amount.items():
+            usd_value = amount * matic_usd_price
+            # TODO: Quizas falla el A_MATIC que es para ethmainnet??!?!?!?!?!
+            # ^^^^^^ ^  ^^^^^^^^^^^^^ ^^^^^^:w
+            self.balances.matic[account] = BalanceSheet(
+                assets=defaultdict(Balance, {A_MATIC: Balance(amount, usd_value)}),
+            )
+
+        # TODO: do same for Polygon network
+        # self.query_defi_balances()
+
+        # XXX: Crashes because underlying_tokens is Nonetype
+        # self.query_ethereum_tokens(self.polygon, self.balances.matic)
+        
+        # TODO: Adapt to matic
+        # self._add_protocol_balances()
 
     @protect_with_lock()
     @cache_response_timewise()
@@ -904,13 +955,14 @@ class ChainManager(CacheableMixIn, LockableQueryMixIn):
                     balances.pop(address, None)
                     saved_accounts.remove(address)
 
-    def modify_btc_bch_avax_accounts(
+    def modify_btc_bch_avax_matic_accounts(
             self,
             accounts: Union[List[BTCAddress], List[ChecksumEvmAddress]],
             blockchain: Literal[
                 SupportedBlockchain.BITCOIN,
                 SupportedBlockchain.BITCOIN_CASH,
                 SupportedBlockchain.AVALANCHE,
+                SupportedBlockchain.POLYGON,
             ],
             append_or_remove: Literal['append', 'remove'],
     ) -> None:
@@ -978,10 +1030,11 @@ class ChainManager(CacheableMixIn, LockableQueryMixIn):
             SupportedBlockchain.BITCOIN,
             SupportedBlockchain.BITCOIN_CASH,
             SupportedBlockchain.AVALANCHE,
+            SupportedBlockchain.POLYGON,
         }:
             # we use `type: ignore` here and in other methods since mypy doesn't understand that
             # types of `blockchain` and `accounts` can be narrowed after if checks
-            self.modify_btc_bch_avax_accounts(
+            self.modify_btc_bch_avax_matic_accounts(
                 accounts=accounts,  # type: ignore
                 blockchain=blockchain,  # type: ignore
                 append_or_remove=append_or_remove,
@@ -1215,6 +1268,8 @@ class ChainManager(CacheableMixIn, LockableQueryMixIn):
         """Also count token balances that may come from various protocols"""
         # If we have anything in DSR also count it towards total blockchain balances
         eth_balances = self.balances.eth
+        # TODO: matic?
+        matic_balances = self.balances.matic
         dsr_module = self.get_module('makerdao_dsr')
         if dsr_module is not None:
             current_dsr_report = dsr_module.get_current_dsr()

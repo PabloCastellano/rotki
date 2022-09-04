@@ -62,12 +62,18 @@ def _hashes_tuple_to_list(hashes: Set[Tuple[str, Timestamp]]) -> List[str]:
 
 
 class Etherscan(ExternalServiceWithApiKey):
-    def __init__(self, database: DBHandler, msg_aggregator: MessagesAggregator) -> None:
+    def __init__(
+        self,
+        database: DBHandler,
+        msg_aggregator: MessagesAggregator,
+        host: str = "https://api.etherscan.io/api",
+    ) -> None:
         super().__init__(database=database, service_name=ExternalService.ETHERSCAN)
         self.msg_aggregator = msg_aggregator
         self.session = requests.session()
         self.warning_given = False
         self.session.headers.update({'User-Agent': 'rotkehlchen'})
+        self.host = host
 
     @overload
     def _query(  # pylint: disable=no-self-use
@@ -129,7 +135,8 @@ class Etherscan(ExternalServiceWithApiKey):
         - RemoteError if there are any problems with reaching Etherscan or if
         an unexpected response is returned
         """
-        query_str = f'https://api.etherscan.io/api?module={module}&action={action}'
+        query_str = f'{self.host}?module={module}&action={action}'
+
         if options:
             for name, value in options.items():
                 query_str += f'&{name}={value}'
@@ -138,7 +145,7 @@ class Etherscan(ExternalServiceWithApiKey):
         if api_key is None:
             if not self.warning_given:
                 self.msg_aggregator.add_warning(
-                    'You do not have an Etherscan API key configured. rotki '
+                    f'You do not have an {self.__class__.__name__} API key configured. rotki '
                     'etherscan queries will still work but will be very slow. '
                     'If you are not using your own ethereum node, it is recommended '
                     'to go to https://etherscan.io/register, create an API '
@@ -151,7 +158,7 @@ class Etherscan(ExternalServiceWithApiKey):
         backoff = 1
         backoff_limit = 33
         while backoff < backoff_limit:
-            log.debug(f'Querying etherscan: {query_str}')
+            log.info(f'Querying {self.__class__.__name__}: {query_str}')
             try:
                 response = self.session.get(query_str, timeout=timeout if timeout else DEFAULT_TIMEOUT_TUPLE)  # noqa: E501
             except requests.exceptions.RequestException as e:
@@ -506,3 +513,18 @@ class Etherscan(ExternalServiceWithApiKey):
             ) from e
 
         return number
+
+
+class Polygonscan(Etherscan):
+    def __init__(
+        self,
+        database: DBHandler,
+        msg_aggregator: MessagesAggregator,
+        host: str = "https://api.polygonscan.com/api",
+    ) -> None:
+        ExternalServiceWithApiKey.__init__(self, database=database, service_name=ExternalService.POLYGONSCAN)
+        self.msg_aggregator = msg_aggregator
+        self.session = requests.session()
+        self.warning_given = False
+        self.session.headers.update({'User-Agent': 'rotkehlchen'})
+        self.host = host

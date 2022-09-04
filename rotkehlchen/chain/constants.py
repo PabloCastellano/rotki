@@ -3,6 +3,7 @@ from rotkehlchen.types import SupportedBlockchain
 DEFAULT_EVM_RPC_TIMEOUT = 10
 NON_BITCOIN_CHAINS = (
     SupportedBlockchain.AVALANCHE,
+    SupportedBlockchain.POLYGON,
     SupportedBlockchain.POLKADOT,
     SupportedBlockchain.ETHEREUM,
     SupportedBlockchain.ETHEREUM_BEACONCHAIN,

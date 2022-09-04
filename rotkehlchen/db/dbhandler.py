@@ -1346,6 +1346,7 @@ class DBHandler:
         returned_list = []
         for x in tokens_list:
             try:
+                # TODO: make it work with other EVM networks too
                 token = EvmToken.from_identifier(x)
             except (DeserializationError, UnknownAsset):
                 token = None
@@ -1408,6 +1409,7 @@ class DBHandler:
         ksm_list = []
         dot_list = []
         avax_list = []
+        matic_list = []
 
         supported_blockchains = {blockchain.value for blockchain in SupportedBlockchain}
         cursor.execute(
@@ -1437,10 +1439,12 @@ class DBHandler:
                 ksm_list.append(entry[1])
             elif entry[0] == SupportedBlockchain.AVALANCHE.value:
                 avax_list.append(entry[1])
+            elif entry[0] == SupportedBlockchain.POLYGON.value:
+                matic_list.append(entry[1])
             elif entry[0] == SupportedBlockchain.POLKADOT.value:
                 dot_list.append(entry[1])
 
-        return BlockchainAccounts(eth=eth_list, btc=btc_list, bch=bch_list, ksm=ksm_list, dot=dot_list, avax=avax_list)  # noqa: E501
+        return BlockchainAccounts(eth=eth_list, btc=btc_list, bch=bch_list, ksm=ksm_list, dot=dot_list, avax=avax_list, matic=matic_list)  # noqa: E501
 
     def get_blockchain_account_data(
             self,
