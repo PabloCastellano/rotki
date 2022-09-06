@@ -173,7 +173,7 @@ def find_uniswap_v2_lp_price(
             return None
 
         if block_identifier <= 12336033:
-            multicall_method = multicall
+            multicall_method = multicall  # TODO: Remove this comment when parameter ethereum gets changed to EvmManager  # noqa: E501  # type: ignore
 
     try:
         output = multicall_method(

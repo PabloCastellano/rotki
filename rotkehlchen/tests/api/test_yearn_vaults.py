@@ -8,7 +8,6 @@ import requests
 
 from rotkehlchen.accounting.structures.balance import Balance
 from rotkehlchen.assets.asset import EvmToken
-from rotkehlchen.chain.ethereum.manager import NodeName
 from rotkehlchen.chain.ethereum.modules.yearn.db import (
     get_yearn_vaults_events,
     get_yearn_vaults_v2_events,
@@ -18,7 +17,7 @@ from rotkehlchen.chain.ethereum.modules.yearn.vaults import (
     YearnVaultEvent,
     YearnVaultHistory,
 )
-from rotkehlchen.chain.ethereum.types import WeightedNode
+from rotkehlchen.chain.ethereum.types import NodeName, WeightedNode
 from rotkehlchen.constants.assets import (
     A_ALINK_V1,
     A_CRVP_DAIUSDCTTUSD,

@@ -8,7 +8,7 @@ from web3.types import BlockIdentifier
 from rotkehlchen.assets.asset import Asset, EvmToken
 from rotkehlchen.constants.assets import A_ETH
 from rotkehlchen.constants.ethereum import ETH_MULTICALL, ETH_MULTICALL_2, ETH_SPECIAL_ADDRESS
-from rotkehlchen.constants.resolver import ChainID, ethaddress_to_identifier
+from rotkehlchen.constants.resolver import ethaddress_to_identifier
 from rotkehlchen.errors.asset import UnknownAsset, UnsupportedAsset
 from rotkehlchen.fval import FVal
 from rotkehlchen.logging import RotkehlchenLogsAdapter
@@ -17,9 +17,9 @@ from rotkehlchen.utils.hexbytes import hexstring_to_bytes
 from rotkehlchen.utils.misc import get_chunks
 
 if TYPE_CHECKING:
-    from rotkehlchen.chain.ethereum.manager import EthereumManager
     from rotkehlchen.chain.ethereum.types import WeightedNode
     from rotkehlchen.chain.evm.contracts import EvmContract
+    from rotkehlchen.chain.evm.manager import EvmManager
 
 
 logger = logging.getLogger(__name__)
@@ -111,7 +111,7 @@ def asset_raw_value(amount: FVal, asset: Asset) -> int:
 
 
 def multicall(
-        manager: 'EthereumManager',
+        manager: 'EvmManager',
         calls: List[Tuple[ChecksumEvmAddress, str]],
         # only here to comply with multicall_2
         require_success: bool = True,  # pylint: disable=unused-argument
@@ -122,7 +122,7 @@ def multicall(
     calls_chunked = list(get_chunks(calls, n=calls_chunk_size))
     output = []
     for call_chunk in calls_chunked:
-        multicall_result = ETH_MULTICALL[ChainID.ETHEREUM].call(
+        multicall_result = ETH_MULTICALL[manager.chain_id].call(
             manager=manager,
             method_name='aggregate',
             arguments=[call_chunk],
@@ -135,7 +135,7 @@ def multicall(
 
 
 def multicall_2(
-        manager: 'EthereumManager',
+        manager: 'EvmManager',
         calls: List[Tuple[ChecksumEvmAddress, str]],
         require_success: bool,
         call_order: Optional[Sequence['WeightedNode']] = None,
@@ -147,7 +147,7 @@ def multicall_2(
     Use a MULTICALL_2 contract for an aggregated query. If require_success
     is set to False any call in the list of calls is allowed to fail.
     """
-    return ETH_MULTICALL_2[ChainID.ETHEREUM].call(
+    return ETH_MULTICALL_2[manager.chain_id].call(
         manager=manager,
         method_name='tryAggregate',
         arguments=[require_success, calls],
@@ -157,7 +157,7 @@ def multicall_2(
 
 
 def multicall_specific(
-        manager: 'EthereumManager',
+        manager: 'EvmManager',
         contract: 'EvmContract',
         method_name: str,
         arguments: List[Any],
