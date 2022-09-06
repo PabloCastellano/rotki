@@ -177,7 +177,7 @@ def find_uniswap_v2_lp_price(
 
     try:
         output = multicall_method(
-            ethereum=ethereum,
+            manager=ethereum,
             require_success=True,
             calls=[(address, contract.encode(method_name=method)) for method in methods],
             block_identifier=block_identifier,

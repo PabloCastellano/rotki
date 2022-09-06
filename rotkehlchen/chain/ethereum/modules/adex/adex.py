@@ -837,7 +837,7 @@ class Adex(EthereumModule):
             return {}
 
         result = multicall_specific(
-            ethereum=self.ethereum,
+            manager=self.ethereum,
             contract=self.staking_pool,
             method_name='balanceOf',
             arguments=[[x] for x in addresses],

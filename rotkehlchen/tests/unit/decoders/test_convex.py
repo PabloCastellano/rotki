@@ -46,7 +46,7 @@ def test_convex_pools(ethereum_manager):
             ),
         )
     booster_result = multicall(
-        ethereum=ethereum_manager,
+        manager=ethereum_manager,
         calls=calls_to_booster,
     )
     convex_rewards_addrs = []
@@ -70,7 +70,7 @@ def test_convex_pools(ethereum_manager):
         calls_to_lp_tokens.append((lp_token_addr, lp_tokens_contract.encode('symbol')))
 
     lp_tokens_result = multicall(
-        ethereum=ethereum_manager,
+        manager=ethereum_manager,
         calls=calls_to_lp_tokens,
     )
 

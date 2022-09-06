@@ -80,7 +80,7 @@ class HasDSProxy(EthereumModule):
         - RemoteError if query to the node failed
         """
         output = multicall(
-            ethereum=self.ethereum,
+            manager=self.ethereum,
             calls=[(
                 DS_PROXY_REGISTRY.address,
                 DS_PROXY_REGISTRY.encode(method_name='proxies', arguments=[address]),

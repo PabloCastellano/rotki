@@ -19,6 +19,7 @@ from rotkehlchen.constants.ethereum import (
     MAKERDAO_VAT,
 )
 from rotkehlchen.constants.misc import ONE, ZERO
+from rotkehlchen.constants.resolver import ChainID
 from rotkehlchen.externalapis.etherscan import Etherscan
 from rotkehlchen.fval import FVal
 from rotkehlchen.tests.utils.api import (
@@ -143,6 +144,7 @@ def mock_etherscan_for_dsr(
     proxy2_contents = proxy2[2:].lower()  # pylint: disable=unsubscriptable-object
 
     def mock_requests_get(url, *args, **kwargs):
+        eth_multicall = ETH_MULTICALL[ChainID.ETHEREUM]
         if 'etherscan.io/api?module=proxy&action=eth_blockNumber' in url:
             response = f'{{"status":"1","message":"OK","result":"{TEST_LATEST_BLOCKNUMBER_HEX}"}}'
         elif 'etherscan.io/api?module=proxy&action=eth_call' in url:
@@ -164,9 +166,9 @@ def mock_etherscan_for_dsr(
                 else:
                     proxy_account = '0x' + '0' * 64
                 response = f'{{"status":"1","message":"OK","result":"{proxy_account}"}}'
-            elif to_address == ETH_MULTICALL.address:
+            elif to_address == eth_multicall.address:
                 web3 = Web3()
-                contract = web3.eth.contract(address=ETH_MULTICALL.address, abi=ETH_MULTICALL.abi)
+                contract = web3.eth.contract(address=eth_multicall.address, abi=eth_multicall.abi)
                 data = url.split('data=')[1]
                 if '&apikey' in data:
                     data = data.split('&apikey')[0]

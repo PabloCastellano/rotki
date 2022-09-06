@@ -221,7 +221,7 @@ class Liquity(HasDSProxy):
             for x in addresses
         ]
         outputs = multicall_2(
-            ethereum=self.ethereum,
+            manager=self.ethereum,
             require_success=False,
             calls=calls,
         )

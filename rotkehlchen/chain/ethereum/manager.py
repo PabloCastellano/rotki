@@ -1161,7 +1161,7 @@ class EthereumManager():
         try:
             # Output contains call status and result
             output = multicall_2(
-                ethereum=self,
+                manager=self,
                 require_success=False,
                 calls=[(address, contract.encode(method_name=prop)) for prop in properties],
             )

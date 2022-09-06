@@ -156,9 +156,14 @@ ETH_SCAN[ChainID.ETHEREUM] = EthereumConstants().contract('ETH_SCAN')
 ETH_SCAN[ChainID.MATIC] = EthereumConstants().contract('ETH_SCAN_MATIC')
 # BalanceScanner from mycrypto: https://github.com/MyCryptoHQ/eth-scan
 
-ETH_MULTICALL = EthereumConstants().contract('ETH_MULTICALL')
-ETH_MULTICALL_2 = EthereumConstants().contract('ETH_MULTICALL_2')
-
+# Multicall from MakerDAO: https://github.com/makerdao/multicall/
+ETH_MULTICALL = {}
+ETH_MULTICALL[ChainID.ETHEREUM] = EthereumConstants().contract('ETH_MULTICALL')
+ETH_MULTICALL[ChainID.MATIC] = EthereumConstants().contract('ETH_MULTICALL_MATIC')
+ETH_MULTICALL_2 = {}
+ETH_MULTICALL_2[ChainID.ETHEREUM] = EthereumConstants().contract('ETH_MULTICALL_2')
+ETH_MULTICALL_2[ChainID.MATIC] = EthereumConstants().contract('ETH_MULTICALL_2_MATIC')
+# Multicall2 on Polygon from https://github.com/makerdao/multicall/pull/24
 
 AAVE_V1_LENDING_POOL = EthereumConstants().contract('AAVE_V1_LENDING_POOL')
 AAVE_V2_LENDING_POOL = EthereumConstants().contract('AAVE_V2_LENDING_POOL')

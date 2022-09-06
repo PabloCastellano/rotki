@@ -185,7 +185,7 @@ class DxdaomesaDecoder(DecoderInterface):  # lgtm[py/missing-call-to-init]
             return None, None
 
         result = multicall_specific(
-            ethereum=self.ethereum,
+            manager=self.ethereum,
             contract=self.contract,
             method_name='tokenIdToAddressMap',
             arguments=[[topic_data[1]], [topic_data[2]]],

@@ -164,7 +164,7 @@ class EvmTokens():
                 ),
             )
         results = multicall(
-            ethereum=self.manager,
+            manager=self.manager,
             calls=calls,
             call_order=call_order,
         )

@@ -37,10 +37,10 @@ def test_detect_tokens_for_addresses(evmtokens):
 
     multicall_uses = 0
 
-    def mock_multicall(ethereum: EthereumManager, **kwargs):
+    def mock_multicall(manager: EthereumManager, **kwargs):
         nonlocal multicall_uses
         multicall_uses += 1
-        return multicall(ethereum=ethereum, **kwargs)
+        return multicall(manager=manager, **kwargs)
 
     multicall_patch = patch(
         target='rotkehlchen.chain.evm.tokens.multicall',

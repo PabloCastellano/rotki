@@ -598,7 +598,7 @@ class Inquirer():
             for i in range(len(pool.assets))
         ]
         output = multicall_2(
-            ethereum=self._ethereum,
+            manager=self._ethereum,
             require_success=False,
             calls=calls,
         )

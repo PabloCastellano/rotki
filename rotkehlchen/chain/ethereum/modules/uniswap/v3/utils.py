@@ -127,7 +127,7 @@ def uniswap_v3_lp_token_balances(
             # Get tokens IDs from the Positions NFT contract using the user address and
             # the indexes i.e from 0 to (total number of user positions in the chunk - 1)
             tokens_ids_multicall = multicall_2(
-                ethereum=ethereum,
+                manager=ethereum,
                 require_success=False,
                 calls=[
                     (
@@ -152,7 +152,7 @@ def uniswap_v3_lp_token_balances(
         try:
             # Get the user liquidity position using the token ID retrieved.
             positions_multicall = multicall_2(
-                ethereum=ethereum,
+                manager=ethereum,
                 require_success=False,
                 calls=[
                     (
@@ -195,7 +195,7 @@ def uniswap_v3_lp_token_balances(
             # Get the liquidity pool's state i.e `slot0` by iterating through
             # a pair of the LP address and its contract and reading the `slot0`
             slots_0_multicall = multicall_2(
-                ethereum=ethereum,
+                manager=ethereum,
                 require_success=False,
                 calls=[
                     (entry[0], entry[1].encode('slot0'))
@@ -259,7 +259,7 @@ def uniswap_v3_lp_token_balances(
         total_tokens_in_pools = []
         try:
             liquidity_in_pools_multicall = multicall_2(
-                ethereum=ethereum,
+                manager=ethereum,
                 require_success=False,
                 calls=[
                     (entry[0], entry[1].encode('liquidity'))

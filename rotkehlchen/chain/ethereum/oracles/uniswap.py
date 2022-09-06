@@ -295,7 +295,7 @@ class UniswapV3Oracle(UniswapOracle):
         token_1: EvmToken,
     ) -> List[str]:
         result = multicall_specific(
-            ethereum=self.eth_manager,
+            manager=self.eth_manager,
             contract=UNISWAP_V3_FACTORY,
             method_name='getPool',
             arguments=[[
@@ -356,7 +356,7 @@ class UniswapV3Oracle(UniswapOracle):
             ),
         ]
         output = multicall(
-            ethereum=self.eth_manager,
+            manager=self.eth_manager,
             calls=calls,
             require_success=True,
             block_identifier=block_identifier,
@@ -433,7 +433,7 @@ class UniswapV2Oracle(UniswapOracle):
             ),
         ]
         output = multicall(
-            ethereum=self.eth_manager,
+            manager=self.eth_manager,
             calls=calls,
             require_success=True,
             block_identifier=block_identifier,

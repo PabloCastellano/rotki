@@ -200,6 +200,7 @@ def mock_etherscan_query(
     extra_flags = [] if extra_flags is None else extra_flags
 
     def mock_requests_get(url, *args, **kwargs):
+        eth_multicall = ETH_MULTICALL[ChainID.ETHEREUM]
         if 'etherscan.io/api?module=account&action=balance&address' in url:
             addr = url[67:109]
             value = eth_map[addr].get('ETH', '0')
@@ -319,9 +320,9 @@ def mock_etherscan_query(
                 response = '{"jsonrpc":"2.0","id":1,"result":"0x0000000000000000000000000000000000000000000000000fc4a48782d85b51"}'  # noqa: E501
             else:
                 raise AssertionError(f'Unknown call to Adex Staking pool during tests: {url}')
-        elif f'api.etherscan.io/api?module=proxy&action=eth_call&to={ETH_MULTICALL.address}' in url:  # noqa: E501
+        elif f'api.etherscan.io/api?module=proxy&action=eth_call&to={eth_multicall.address}' in url:  # noqa: E501
             web3 = Web3()
-            contract = web3.eth.contract(address=ETH_MULTICALL.address, abi=ETH_MULTICALL.abi)
+            contract = web3.eth.contract(address=eth_multicall.address, abi=eth_multicall.abi)
             if 'b6456b57f03352be48bf101b46c1752a0813491a' in url:
                 multicall_purpose = 'adex_staking'
             elif 'c2cb1040220768554cf699b0d863a3cd4324ce3' in url:

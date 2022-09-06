@@ -8,7 +8,7 @@ from web3.types import BlockIdentifier
 from rotkehlchen.assets.asset import Asset, EvmToken
 from rotkehlchen.constants.assets import A_ETH
 from rotkehlchen.constants.ethereum import ETH_MULTICALL, ETH_MULTICALL_2, ETH_SPECIAL_ADDRESS
-from rotkehlchen.constants.resolver import ethaddress_to_identifier
+from rotkehlchen.constants.resolver import ChainID, ethaddress_to_identifier
 from rotkehlchen.errors.asset import UnknownAsset, UnsupportedAsset
 from rotkehlchen.fval import FVal
 from rotkehlchen.logging import RotkehlchenLogsAdapter
@@ -111,7 +111,7 @@ def asset_raw_value(amount: FVal, asset: Asset) -> int:
 
 
 def multicall(
-        ethereum: 'EthereumManager',
+        manager: 'EthereumManager',
         calls: List[Tuple[ChecksumEvmAddress, str]],
         # only here to comply with multicall_2
         require_success: bool = True,  # pylint: disable=unused-argument
@@ -122,8 +122,8 @@ def multicall(
     calls_chunked = list(get_chunks(calls, n=calls_chunk_size))
     output = []
     for call_chunk in calls_chunked:
-        multicall_result = ETH_MULTICALL.call(
-            manager=ethereum,
+        multicall_result = ETH_MULTICALL[ChainID.ETHEREUM].call(
+            manager=manager,
             method_name='aggregate',
             arguments=[call_chunk],
             call_order=call_order,
@@ -135,7 +135,7 @@ def multicall(
 
 
 def multicall_2(
-        ethereum: 'EthereumManager',
+        manager: 'EthereumManager',
         calls: List[Tuple[ChecksumEvmAddress, str]],
         require_success: bool,
         call_order: Optional[Sequence['WeightedNode']] = None,
@@ -147,8 +147,8 @@ def multicall_2(
     Use a MULTICALL_2 contract for an aggregated query. If require_success
     is set to False any call in the list of calls is allowed to fail.
     """
-    return ETH_MULTICALL_2.call(
-        manager=ethereum,
+    return ETH_MULTICALL_2[ChainID.ETHEREUM].call(
+        manager=manager,
         method_name='tryAggregate',
         arguments=[require_success, calls],
         call_order=call_order,
@@ -157,7 +157,7 @@ def multicall_2(
 
 
 def multicall_specific(
-        ethereum: 'EthereumManager',
+        manager: 'EthereumManager',
         contract: 'EvmContract',
         method_name: str,
         arguments: List[Any],
@@ -167,7 +167,7 @@ def multicall_specific(
         contract.address,
         contract.encode(method_name=method_name, arguments=i),
     ) for i in arguments]
-    output = multicall(ethereum, calls, True, call_order)
+    output = multicall(manager, calls, True, call_order)
     return [contract.decode(x, method_name, arguments[0]) for x in output]
 
 
