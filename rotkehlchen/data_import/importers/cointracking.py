@@ -168,6 +168,9 @@ class CointrackingImporter(BaseExchangeImporter):
                 link='',
             )
             self.add_asset_movement(cursor, asset_movement)
+        elif row_type == 'Staking':
+            # self.add_staking?
+            pass
         else:
             raise UnsupportedCSVEntry(
                 f'Unknown entrype type "{row_type}" encountered during cointracking '

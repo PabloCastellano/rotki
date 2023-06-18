@@ -2562,7 +2562,8 @@
     "cointracking": {
       "line_one": "Trades/deposits/withdrawals from CoinTracking do not include fees.",
       "line_three": "ETH/BTC Transactions are treated as deposits/withdrawals so they are not imported in rotki. To import ETH transactions simply input your accounts in {0} and they will be imported automatically for you.",
-      "line_two": "All trades imported from CoinTracking will always be considered as buys due to the way the data are represented.",
+      "line_four": "Make sure you have exported your CSV in English.",
+      "line_two": "All trades imported from Cointracking will always be considered as buys due to the way the data are represented.",
       "link": "Blockchain Accounts/Balances",
       "name": "CoinTracking",
       "preferred": "For the above reasons it's preferred to directly connect your exchanges in order to import data from there. If you do not do that a lot of accuracy is lost."
