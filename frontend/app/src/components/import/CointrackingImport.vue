@@ -20,6 +20,7 @@ const { t } = useI18n();
           {{ t('import_data.cointracking.link') }}
         </internal-link>
       </i18n>
+      <li>{{ t('import_data.cointracking.line_four') }}</li>
     </ul>
   </import-source>
 </template>
