@@ -692,6 +692,8 @@ You can also import data from `cointracking.info <https://cointracking.info/>`_ 
 
 Rotki can import any trade CSV data exported from cointracking.info. But in general it's not recommended to utilize cointracking as their exported data are missing a lot of information.
 
+Important: make sure you export your data from cointracking.info with language English chosen.
+
 .. image:: images/sc_data_import.png
    :alt: Importing data from cointracking.info
    :align: center
@@ -1091,7 +1093,7 @@ If you stake LQTY in the protocol you can see stability pool deposits, staked am
    :alt: See your Liquity staking gains
    :align: center
 
-On the left side, we display information for your current deposited amount of ``LUSD`` in the stability pool along with the ``ETH`` and ``LQTY`` rewards that you haven't claimed yet. In the right side, we display the staked ``LQTY`` and the ``ETH`` and ``LUSD`` that are available to claim. 
+On the left side, we display information for your current deposited amount of ``LUSD`` in the stability pool along with the ``ETH`` and ``LQTY`` rewards that you haven't claimed yet. In the right side, we display the staked ``LQTY`` and the ``ETH`` and ``LUSD`` that are available to claim.
 
 The Liquity statistics are calculated using the queried events and you might need to wait for some time until all the events are queried to get the final values. The values in terms of USD can be displayed using prices at the moment of the different events (``historical``) or using prices at the present (``current``).
 
